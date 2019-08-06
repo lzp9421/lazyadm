@@ -15,9 +15,11 @@ type Server struct {
 
 func NewServer(conf *config.Context, router *Router) (*Server, error) {
 	conf.SetSection("server")
+	defer conf.SetSection("DEFAULT")
+
 	host := conf.StringDefault("http.host", "127.0.0.1")
 	port := conf.IntDefault("http.port", 8080)
-	conf.SetSection("DEFAULT")
+
 	return &Server{
 		host:   host,
 		port:   port,
@@ -25,7 +27,7 @@ func NewServer(conf *config.Context, router *Router) (*Server, error) {
 	}, nil
 }
 
-func (this *Server) Listen() {
-	fmt.Print(this.host + ":" + strconv.Itoa(this.port))
-	http.ListenAndServe(this.host+":"+strconv.Itoa(this.port), this.router.GetHandle())
+func (s *Server) Listen() {
+	fmt.Print(s.host + ":" + strconv.Itoa(s.port))
+	http.ListenAndServe(s.host+":"+strconv.Itoa(s.port), s.router.GetHandle())
 }

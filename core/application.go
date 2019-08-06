@@ -7,11 +7,13 @@ import (
 )
 
 type Application struct {
-	di     map[string]interface{}
-	conf   *config.Context
-	mysql  *database.Mysql
-	router *Router
-	server *Server
+	di       map[string]interface{}
+	conf     *config.Context
+	mysql    *database.Mysql
+	redis    *database.Redis
+	memcache *database.Memcache
+	router   *Router
+	server   *Server
 }
 
 var application *Application
@@ -65,6 +67,48 @@ func (a *Application) GetMysql() *database.Mysql {
 		return nil
 	}
 	return a.mysql
+}
+
+func (a *Application) InitRedis() bool {
+	if a.conf == nil {
+		panic("配置信息未初始化")
+		return false
+	}
+	redis, err := database.NewRedis(a.conf)
+	if err != nil {
+		return false
+	}
+	a.redis = redis
+	return true
+}
+
+func (a *Application) GetRedis() *database.Redis {
+	if a.redis == nil {
+		panic("Redis未初始化")
+		return nil
+	}
+	return a.redis
+}
+
+func (a *Application) InitMemcache() bool {
+	if a.conf == nil {
+		panic("配置信息未初始化")
+		return false
+	}
+	memcache, err := database.NewMemcache(a.conf)
+	if err != nil {
+		return false
+	}
+	a.memcache = memcache
+	return true
+}
+
+func (a *Application) GetMemcache() *database.Memcache {
+	if a.memcache == nil {
+		panic("Memcache未初始化")
+		return nil
+	}
+	return a.memcache
 }
 
 func (a *Application) InitRouter(route func(*Router)) bool {

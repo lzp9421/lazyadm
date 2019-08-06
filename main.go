@@ -9,13 +9,19 @@ import (
 func init () {
 
 	application := core.App()
+
 	application.InitConfig("lazyadm.ini")
+
 	application.InitMysql()
+	application.InitRedis()
+	application.InitMemcache()
+
 	application.InitRouter(func(router *core.Router) {
 		router.HandleStatic(app.Asset)
 		routers.RegisterWebHanler(router)
 		routers.RegisterApiHanler(router)
 	})
+
 	application.InitServer()
 }
 

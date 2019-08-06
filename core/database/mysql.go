@@ -28,6 +28,8 @@ func (m *Mysql) Database(name string) *sql.DB {
 
 	conf := m.conf
 	conf.SetSection("mysql." + name)
+	defer conf.SetSection("DEFAULT")
+
 	dataSourceName := fmt.Sprintf(
 		"%s:%s@tcp(%s:%s)/%s?charset=%s&timeout=10s",
 		conf.StringDefault("user", "root"),
@@ -44,8 +46,8 @@ func (m *Mysql) Database(name string) *sql.DB {
 	}
 	databases.SetMaxIdleConns(2)
 	databases.SetMaxOpenConns(conf.IntDefault("maxOpenConns", 1000))
-	conf.SetSection("DEFAULT")
 	databases.SetConnMaxLifetime(time.Duration(60) * time.Second)
+
 	m.databases[name] = databases
 	return databases
 }
