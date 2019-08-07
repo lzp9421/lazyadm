@@ -39,7 +39,7 @@ func (a *Application) GetDi(name string) interface{} {
 }
 
 func (a *Application) InitConfig(filename string) bool {
-	conf, err := config.LoadContext(filename, []string{"config"})
+	conf, err := config.LoadContext(filename, []string{""})
 	if err != nil {
 		fmt.Println("配置文件读取失败")
 		return false

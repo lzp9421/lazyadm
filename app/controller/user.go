@@ -1,6 +1,9 @@
 package controller
 
-import "net/http"
+import (
+	"net/http"
+	"lazyadm/app/model"
+)
 
 type User struct {
 	Controller
@@ -13,7 +16,9 @@ func NewUser (res http.ResponseWriter, req *http.Request) (*User) {
 }
 
 func (u *User)IndexAction()  {
-	u.Response(0, "aaaaaaa", map[string]interface{}{"ssss": "dfasf"})
+	mdlLog := model.NewLog()
+	data := mdlLog.GetById(1)
+	u.Response(0, "aaaaaaa", data)
 }
 
 func (u *User)Index2Action()  {
