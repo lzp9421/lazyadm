@@ -13,3 +13,7 @@ func (m *Model)HdDb() *core.Db {
 func (m *Model)HdDbRead() *core.Db {
 	return m.Db("hd.read")
 }
+
+func (m *Model)HdMc() *core.Memcache {
+	return m.Mc("hd")
+}
