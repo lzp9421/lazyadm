@@ -4,6 +4,7 @@ import (
 	"github.com/revel/config"
 	"github.com/bradfitz/gomemcache/memcache"
 	"strings"
+	"time"
 )
 
 type Memcache struct {
@@ -36,6 +37,7 @@ func (m *Memcache) Mc(name string) *memcache.Client {
 
 	mc := memcache.New(server...)
 	mc.MaxIdleConns = 10 // 最大保持10个空闲连接
+	mc.Timeout = time.Duration(10) * time.Second
 
 	m.mc[name] = mc
 	return mc
