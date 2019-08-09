@@ -84,7 +84,7 @@ func staticAJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/a.js", size: 7, mode: os.FileMode(420), modTime: time.Unix(1565367085, 0)}
+	info := bindataFileInfo{name: "static/a.js", size: 7, mode: os.FileMode(420), modTime: time.Unix(1565367823, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -104,7 +104,7 @@ func templatesIndexHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "templates/index.html", size: 132, mode: os.FileMode(420), modTime: time.Unix(1565367085, 0)}
+	info := bindataFileInfo{name: "templates/index.html", size: 132, mode: os.FileMode(420), modTime: time.Unix(1565367823, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

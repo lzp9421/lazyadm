@@ -47,6 +47,7 @@ var MysqlLostConnection = []string{
 	"Packets out of order. Expected",
 	"Adaptive Server connection failed",
 	"Communication link failure",
+	"connection refused",
 }
 
 func NewDb(name string) *Db {

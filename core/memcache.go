@@ -9,6 +9,7 @@ import (
 
 var McLostConnection = []string{
 	"reset by peer",
+	"connection refused",
 }
 
 type Memcache struct {
