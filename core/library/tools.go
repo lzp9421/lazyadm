@@ -9,13 +9,7 @@ import (
 
 func CheckError(err error) {
 	if err != nil {
-		panic(err.Error())
-	}
-}
-
-func CheckQueryError(err error, query string)  {
-	if err != nil {
-		fmt.Println(fmt.Sprintf("%s %s", query, err))
+		fmt.Println(err.Error())
 	}
 }
 
@@ -134,4 +128,22 @@ func ToCamelString(s string) string {
 		data = append(data, d)
 	}
 	return string(data[:])
+}
+
+func ContainInArray(str string, arr []string) bool {
+	for _, s := range arr  {
+		if strings.Index(s, str) != -1 {
+			return true
+		}
+	}
+	return false
+}
+
+func InArray(str string, arr []string) bool {
+	for _, s := range arr  {
+		if s == str {
+			return true
+		}
+	}
+	return false
 }

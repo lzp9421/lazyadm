@@ -18,7 +18,7 @@ func NewUser (res http.ResponseWriter, req *http.Request) (*User) {
 func (u *User)IndexAction()  {
 	mdlLog := model.NewLog()
 	data := mdlLog.GetById(1)
-	data["mc_get"], _ = mdlLog.HdMc().Get("aa")
+	data["mc_get"] = mdlLog.HdMc().Get("aa")
 	u.Response(0, "aaaaaaa", data)
 }
 

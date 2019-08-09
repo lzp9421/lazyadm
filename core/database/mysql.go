@@ -42,7 +42,7 @@ func (m *Mysql) Database(name string) *sql.DB {
 			panic("mysql connect error" + err.Error())
 			return nil
 		}
-		databases.SetMaxIdleConns(2)
+		databases.SetMaxIdleConns(16)
 		databases.SetMaxOpenConns(conf.IntDefault("maxOpenConns", 1000))
 		databases.SetConnMaxLifetime(time.Duration(60) * time.Second)
 

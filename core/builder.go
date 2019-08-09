@@ -5,7 +5,6 @@ import (
 	"lazyadm/core/library"
 	"strings"
 	"strconv"
-	"database/sql"
 	"math"
 )
 
@@ -165,8 +164,7 @@ func (b *Builder) Fetch(fields string, order string, group string, limit int, st
 
 	queryString := b.MakeQueryString(fields, order, group, limit, start)
 
-	rows, err := b.schema.db.Query(queryString)
-	library.CheckQueryError(err, queryString)
+	rows := b.schema.Query(queryString)
 	defer rows.Close()
 
 	lists := ParseData(rows)
@@ -179,8 +177,7 @@ func (b *Builder) FetchRow(fields string, order string, group string, start int)
 
 	queryString := b.MakeQueryString(fields, order, group, 1, start)
 
-	rows, err := b.schema.db.Query(queryString)
-	library.CheckQueryError(err, queryString)
+	rows := b.schema.Query(queryString)
 	defer rows.Close()
 
 	item := ParseRowData(rows)
@@ -193,8 +190,7 @@ func (b *Builder) FetchOne(field string, order string, group string, start int) 
 
 	queryString := b.MakeQueryString(field, order, group, 1, start)
 
-	rows, err := b.schema.db.Query(queryString)
-	library.CheckQueryError(err, queryString)
+	rows := b.schema.Query(queryString)
 	defer rows.Close()
 
 	item := ParseRowData(rows)
@@ -208,7 +204,8 @@ func (b *Builder) Insert(set map[string]interface{}) int64 {
 		panic("没有指定表名")
 	}
 
-	stmt, err := b.schema.db.Prepare("INSERT INTO " + b.table + " SET " + BuildVal(set, []string{}))
+	queryString := "INSERT INTO " + b.table + " SET " + BuildVal(set, []string{})
+	stmt, err := b.schema.db.Prepare(queryString)
 	library.CheckError(err)
 	defer stmt.Close()
 
@@ -231,7 +228,8 @@ func (b *Builder) Update(set map[string]interface{}) int64 {
 		return 0
 	}
 
-	stmt, err := b.schema.db.Prepare("UPDATE " + b.table + " SET " + BuildVal(set, []string{}) + where)
+	queryString := "UPDATE " + b.table + " SET " + BuildVal(set, []string{}) + where
+	stmt, err := b.schema.db.Prepare(queryString)
 	library.CheckError(err)
 	defer stmt.Close()
 
@@ -265,7 +263,8 @@ func (b *Builder) Increment(column string, amount int, set map[string]interface{
 		}
 	}
 
-	stmt, err := b.schema.db.Prepare("UPDATE " + b.table + " SET " + BuildVal(set, extra) + where)
+	queryString := "UPDATE " + b.table + " SET " + BuildVal(set, extra) + where
+	stmt, err := b.schema.db.Prepare(queryString)
 	library.CheckError(err)
 	defer stmt.Close()
 
@@ -291,7 +290,9 @@ func (b *Builder) Delete() int64 {
 	if len(where) <= 0 {
 		return 0
 	}
-	stmt, err := b.schema.db.Prepare("DELETE FROM " + b.table + " " + where)
+
+	queryString := "DELETE FROM " + b.table + " " + where
+	stmt, err := b.schema.db.Prepare(queryString)
 	library.CheckError(err)
 	defer stmt.Close()
 
@@ -301,71 +302,4 @@ func (b *Builder) Delete() int64 {
 	id, err := res.RowsAffected()
 	library.CheckError(err)
 	return id
-}
-
-// 解析结果集
-func ParseData(rows *sql.Rows) []map[string]interface{} {
-	var data []map[string]interface{} = nil
-
-	columns, err := rows.Columns()
-	library.CheckError(err)
-	fCount := len(columns)
-	fieldPtr := make([]interface{}, fCount)
-	fieldArr := make([]sql.RawBytes, fCount)
-	fieldToID := make(map[string]int64, fCount)
-	for k, v := range columns {
-		fieldPtr[k] = &fieldArr[k]
-		fieldToID[v] = int64(k)
-	}
-
-	for rows.Next() {
-		err = rows.Scan(fieldPtr...)
-		library.CheckError(err)
-
-		m := make(map[string]interface{}, fCount)
-
-		for k, v := range fieldToID {
-			if fieldArr[v] == nil {
-				m[k] = ""
-			} else {
-				m[k] = string(fieldArr[v])
-			}
-		}
-		data = append(data, m)
-	}
-
-	err = rows.Err()
-	library.CheckError(err)
-	return data
-}
-
-// 解析单行结果集
-func ParseRowData(rows *sql.Rows) map[string]interface{} {
-	columns, err := rows.Columns()
-	library.CheckError(err)
-	fCount := len(columns)
-	fieldPtr := make([]interface{}, fCount)
-	fieldArr := make([]sql.RawBytes, fCount)
-	fieldToID := make(map[string]int64, fCount)
-	for k, v := range columns {
-		fieldPtr[k] = &fieldArr[k]
-		fieldToID[v] = int64(k)
-	}
-
-	m := make(map[string]interface{}, fCount)
-	if rows.Next() {
-		err = rows.Scan(fieldPtr...)
-		library.CheckError(err)
-
-		for k, v := range fieldToID {
-			if fieldArr[v] == nil {
-				m[k] = ""
-			} else {
-				m[k] = string(fieldArr[v])
-			}
-		}
-	}
-	err = rows.Err()
-	library.CheckError(err)
-	return m
 }
