@@ -2,10 +2,10 @@ package core
 
 import (
 	"github.com/gorilla/mux"
-	"net/http"
-	"unsafe"
-	"reflect"
 	"lazyadm/core/library"
+	"net/http"
+	"reflect"
+	"unsafe"
 )
 
 type Router struct {
@@ -19,24 +19,25 @@ func NewRouter() (*Router, error) {
 	}, nil
 }
 
-func (r *Router) HandleFunc(path string, f interface{}) {
-	r.router.HandleFunc(path, r.Handler(f))
+func (r *Router) HandleFunc(path string, c interface{}) {
+	r.router.HandleFunc(path, r.Handler(c))
 }
 
-func (r *Router) Handler(n interface{}) func(res http.ResponseWriter, req *http.Request) {
-	fn := reflect.ValueOf(n)
+func (r *Router) Handler(c interface{}) func(res http.ResponseWriter, req *http.Request) {
+	v := reflect.ValueOf(c)
+	t := reflect.Indirect(v).Type()
 	h := func(res http.ResponseWriter, req *http.Request) {
 		action := mux.Vars(req)["action"]
-		params := []reflect.Value{reflect.ValueOf(res), reflect.ValueOf(req)}
-		c := fn.Call(params)[0]
+		c := reflect.New(t)
 		pC := unsafe.Pointer(c.Pointer())
 		base := (*Controller)(pC)
+		base.Init(t.Name(), c.Interface().(IControllerRun), res, req)
 		base.Run(action)
 	}
 	return h
 }
 
-func (r *Router)HandleStatic(asset func(string) ([]byte, error)) {
+func (r *Router) HandleStatic(asset func(string) ([]byte, error)) {
 	r.router.HandleFunc("/{path:static/.+}", func(res http.ResponseWriter, req *http.Request) {
 		path := mux.Vars(req)["path"]
 		data, err := asset(path)
@@ -50,6 +51,6 @@ func (r *Router)HandleStatic(asset func(string) ([]byte, error)) {
 	})
 }
 
-func (r *Router) GetHandle() (*mux.Router) {
+func (r *Router) GetHandle() *mux.Router {
 	return r.router
 }
