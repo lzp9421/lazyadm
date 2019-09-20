@@ -2,20 +2,22 @@ package core
 
 import (
 	"github.com/gorilla/mux"
-	"lazyadm/core/library"
 	"net/http"
 	"reflect"
-	"unsafe"
+	"lazyadm/core/library"
+	"strings"
 )
 
 type Router struct {
 	router *mux.Router
+	actions map[string]map[string]bool
 }
 
 func NewRouter() (*Router, error) {
 	router := mux.NewRouter()
 	return &Router{
 		router: router,
+		actions: map[string]map[string]bool{},
 	}, nil
 }
 
@@ -25,14 +27,46 @@ func (r *Router) HandleFunc(path string, c interface{}) {
 
 func (r *Router) Handler(c interface{}) func(res http.ResponseWriter, req *http.Request) {
 	v := reflect.ValueOf(c)
-	t := reflect.Indirect(v).Type()
+	vt := reflect.TypeOf(c)
+	ct := reflect.Indirect(v).Type()
+	name := ct.Name()
+
+	// 获取控制器方法列表
+	if _, ok := r.actions[name]; !ok {
+		methodNum := vt.NumMethod()
+		r.actions[name] = map[string]bool{}
+		// 获取方法
+		for i := 0; i < methodNum; i++ {
+			m := vt.Method(i)
+			methodName := m.Name
+			if strings.HasSuffix(methodName, "Action") {
+				methodName = methodName[0: len(methodName) - 6]
+				r.actions[name][methodName] = true
+			}
+		}
+	}
+
 	h := func(res http.ResponseWriter, req *http.Request) {
 		action := mux.Vars(req)["action"]
-		c := reflect.New(t)
-		pC := unsafe.Pointer(c.Pointer())
-		base := (*Controller)(pC)
-		base.Init(t.Name(), c.Interface().(IControllerRun), res, req)
-		base.Run(action)
+		if action == "" {
+			action = "Index"
+		}
+		action = library.ToCamelString(action)
+		c := reflect.New(ct)
+		base := c.Interface().(IController)
+		base.Init(res, req)
+
+		if _, ok := r.actions[name][action]; !ok {
+			base.Abort(404, "404 page not found")
+			return
+		}
+		m := c.MethodByName(action + "Action")
+		if !m.IsValid() {
+			base.Abort(404, "404 page not found")
+			return
+		}
+		a := m.Interface().(func())
+		base.Run(a)
 	}
 	return h
 }

@@ -3,46 +3,27 @@ package core
 import (
 	"net/http"
 	"encoding/json"
-	"reflect"
 	"lazyadm/core/library"
-	"strings"
+	"fmt"
 )
 
-type IControllerRun interface {
-	Run(action string)
+type IController interface {
+	Init(res http.ResponseWriter, req *http.Request)
+	Run(action func())
+	Abort(httpCode int, message string)
 }
 
 type Controller struct {
 	actions map[string]func()
 	Res     http.ResponseWriter
 	Req     *http.Request
-	name    string
-	Self    IControllerRun
 	tpl     *Template
 }
 
-var actionsMap = map[string]map[string]int{}
-
-func (c *Controller) Init(name string, self IControllerRun, res http.ResponseWriter, req *http.Request) {
+func (c *Controller) Init(res http.ResponseWriter, req *http.Request) {
 	c.Res = res
 	c.Req = req
-	c.name = name
-	c.Self = self
 	c.tpl = NewTemplate(res, req, "templates/", ".html")
-
-	if _, ok := actionsMap[name]; !ok {
-		actionsMap[name] = map[string]int{}
-		getType := reflect.TypeOf(self)
-		// 获取方法
-		for i := 0; i < getType.NumMethod(); i++ {
-			m := getType.Method(i)
-			methodName := m.Name
-			if strings.HasSuffix(methodName, "Action") {
-				methodName = methodName[0: len(methodName)-6]
-				actionsMap[name][methodName] = 1
-			}
-		}
-	}
 }
 
 func (c *Controller) GetString(name string) string {
@@ -61,30 +42,14 @@ func (c *Controller) PostInt(name string) int {
 	return library.ToInt(c.Req.FormValue(name))
 }
 
-func (c *Controller) Run(action string) {
-
-	if action == "" {
-		action = "Index"
-	}
-	action = library.ToCamelString(action)
-	if c.actions == nil {
-		c.actions = map[string]func(){}
-	}
-	if _, ok := c.actions[action]; !ok {
-		if _, ok := actionsMap[c.name][action]; !ok {
-			c.Abort(404, "404 page not found")
-			return
+func (c *Controller) Run(action func()) {
+	defer func() { // 必须要先声明defer，否则不能捕获到panic异常
+		if err := recover(); err != nil {
+			fmt.Println(err) // 这里的err其实就是panic传入的内容
+			c.Abort(500, err.(error).Error())
 		}
-		getValue := reflect.ValueOf(c.Self)
-		methodValue := getValue.MethodByName(action + "Action")
-		if !methodValue.IsValid() {
-			c.Abort(404, "404 page not found")
-			return
-		}
-		method := methodValue.Interface().(func())
-		c.actions[action] = method
-	}
-	c.actions[action]()
+	}()
+	action()
 }
 
 func (c *Controller) Abort(httpCode int, message string) {
