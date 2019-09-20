@@ -64,7 +64,7 @@ func (d *Db)Table(table string) *Builder {
 }
 
 // 获取查询构建器
-func (d *Db)Query(query string) (*sql.Rows) {
+func (d *Db)Query(query string) *sql.Rows {
 	var err error
 	var rows *sql.Rows
 	for retry := 2; retry > 0; retry-- {
@@ -80,7 +80,7 @@ func (d *Db)Query(query string) (*sql.Rows) {
 		rows.Close()
 	}
 	fmt.Println(fmt.Sprintf("%s %s", query, err.Error()))
-	return nil
+	panic(err)
 }
 
 

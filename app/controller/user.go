@@ -1,18 +1,11 @@
 package controller
 
 import (
-	"net/http"
 	"lazyadm/app/model"
 )
 
 type User struct {
 	Controller
-}
-
-func NewUser (res http.ResponseWriter, req *http.Request) (*User) {
-	user := &User{}
-	user.Init("user", user, res, req)
-	return user
 }
 
 func (u *User)IndexAction()  {
