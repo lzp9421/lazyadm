@@ -1,10 +1,11 @@
 package core
 
 import (
-	"net/http"
 	"encoding/json"
-	"lazyadm/core/library"
 	"fmt"
+	"lazyadm/core/library"
+	"net/http"
+	"runtime/debug"
 )
 
 type IController interface {
@@ -45,7 +46,8 @@ func (c *Controller) PostInt(name string) int {
 func (c *Controller) Run(action func()) {
 	defer func() { // 必须要先声明defer，否则不能捕获到panic异常
 		if err := recover(); err != nil {
-			fmt.Println(err) // 这里的err其实就是panic传入的内容
+			fmt.Println(err)                   // 这里的err其实就是panic传入的内容
+			fmt.Println(string(debug.Stack())) // 这里的err其实就是panic传入的内容
 			c.Abort(500, err.(error).Error())
 		}
 	}()

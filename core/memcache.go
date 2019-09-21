@@ -34,6 +34,9 @@ func (m *Memcache) Get(key string) string {
 		if err == nil {
 			return string(item.Value)
 		}
+		if err == memcache.ErrCacheMiss {
+			return ""
+		}
 		if !library.ContainInArray(err.Error(), McLostConnection) {
 			break
 		}
