@@ -3,9 +3,7 @@ package core
 import (
 	"github.com/bradfitz/gomemcache/memcache"
 	"lazyadm/core/library"
-	"fmt"
 )
-
 
 var McLostConnection = []string{
 	"reset by peer",
@@ -14,7 +12,7 @@ var McLostConnection = []string{
 
 type Memcache struct {
 	name string
-	mc *memcache.Client
+	mc   *memcache.Client
 }
 
 func NewMemcache(name string) *Memcache {
@@ -40,9 +38,7 @@ func (m *Memcache) Get(key string) string {
 			break
 		}
 	}
-
-	fmt.Println( key, err)
-	return ""
+	panic(err)
 }
 
 // GetMulti is a batch version of Get. The returned map from keys to
@@ -66,9 +62,7 @@ func (m *Memcache) GetMulti(keys []string) map[string]string {
 			break
 		}
 	}
-
-	fmt.Println(fmt.Sprintf("%v %s", keys, err))
-	return nil
+	panic(err)
 }
 
 // Increment atomically increments key by delta. The return value is
@@ -94,12 +88,11 @@ func (m *Memcache) Decrement(key string, delta uint64) uint64 {
 	return newValue
 }
 
-
 // Set writes the given item, unconditionally.
 func (m *Memcache) Set(key string, value string, expiration int32) bool {
 	item := &memcache.Item{
-		Key: key,
-		Value: []byte(value),
+		Key:        key,
+		Value:      []byte(value),
 		Expiration: expiration,
 	}
 	err := m.mc.Set(item)
@@ -110,8 +103,8 @@ func (m *Memcache) Set(key string, value string, expiration int32) bool {
 // key. ErrNotStored is returned if that condition is not met.
 func (m *Memcache) Add(key string, value string, expiration int32) bool {
 	item := &memcache.Item{
-		Key: key,
-		Value: []byte(value),
+		Key:        key,
+		Value:      []byte(value),
 		Expiration: expiration,
 	}
 	err := m.mc.Add(item)
@@ -122,8 +115,8 @@ func (m *Memcache) Add(key string, value string, expiration int32) bool {
 // already hold data for this key
 func (m *Memcache) Replace(key string, value string, expiration int32) error {
 	item := &memcache.Item{
-		Key: key,
-		Value: []byte(value),
+		Key:        key,
+		Value:      []byte(value),
 		Expiration: expiration,
 	}
 	return m.mc.Replace(item)

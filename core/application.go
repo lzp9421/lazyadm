@@ -1,9 +1,10 @@
 package core
 
 import (
-	"fmt"
+	"errors"
 	"github.com/revel/config"
 	"lazyadm/core/database"
+	"lazyadm/core/library"
 )
 
 type Application struct {
@@ -18,7 +19,7 @@ type Application struct {
 
 var application *Application
 
-func App() (*Application) {
+func App() *Application {
 	if application == nil {
 		application = &Application{}
 	}
@@ -40,82 +41,65 @@ func (a *Application) GetDi(name string) interface{} {
 
 func (a *Application) InitConfig(filename string) bool {
 	conf, err := config.LoadContext(filename, []string{""})
-	if err != nil {
-		fmt.Println("配置文件读取失败")
-		return false
-	}
+	library.CheckError(err)
 	a.conf = conf
 	return true
 }
 
 func (a *Application) InitMysql() bool {
 	if a.conf == nil {
-		panic("配置信息未初始化")
-		return false
+		panic(errors.New("配置信息未初始化"))
 	}
 	mysql, err := database.NewMysql(a.conf)
-	if err != nil {
-		return false
-	}
+	library.CheckError(err)
 	a.mysql = mysql
 	return true
 }
 
 func (a *Application) GetMysql() *database.Mysql {
 	if a.mysql == nil {
-		panic("数据库未初始化")
-		return nil
+		panic(errors.New("数据库未初始化"))
 	}
 	return a.mysql
 }
 
 func (a *Application) InitRedis() bool {
 	if a.conf == nil {
-		panic("配置信息未初始化")
-		return false
+		panic(errors.New("配置信息未初始化"))
 	}
 	redis, err := database.NewRedis(a.conf)
-	if err != nil {
-		return false
-	}
+	library.CheckError(err)
 	a.redis = redis
 	return true
 }
 
 func (a *Application) GetRedis() *database.Redis {
 	if a.redis == nil {
-		panic("Redis未初始化")
-		return nil
+		panic(errors.New("Redis未初始化"))
 	}
 	return a.redis
 }
 
 func (a *Application) InitMemcache() bool {
 	if a.conf == nil {
-		panic("配置信息未初始化")
-		return false
+		panic(errors.New("配置信息未初始化"))
 	}
 	memcache, err := database.NewMemcache(a.conf)
-	if err != nil {
-		return false
-	}
+	library.CheckError(err)
 	a.memcache = memcache
 	return true
 }
 
 func (a *Application) GetMemcache() *database.Memcache {
 	if a.memcache == nil {
-		panic("Memcache未初始化")
-		return nil
+		panic(errors.New("Memcache未初始化"))
 	}
 	return a.memcache
 }
 
 func (a *Application) InitRouter(route func(*Router)) bool {
 	router, err := NewRouter()
-	if err != nil {
-		return false
-	}
+	library.CheckError(err)
 	a.router = router
 	route(a.router)
 	return true
@@ -123,26 +107,20 @@ func (a *Application) InitRouter(route func(*Router)) bool {
 
 func (a *Application) InitServer() bool {
 	if a.conf == nil {
-		panic("配置信息未初始化")
-		return false
+		panic(errors.New("配置信息未初始化"))
 	}
 	if a.router == nil {
-		panic("路由未初始化")
-		return false
+		panic(errors.New("路由未初始化"))
 	}
 	server, err := NewServer(a.conf, a.router)
-	if err != nil {
-		panic("服务器初始化失败: " + err.Error())
-		return false
-	}
+	library.CheckError(err)
 	a.server = server
 	return true
 }
 
 func (a *Application) GetServer() *Server {
 	if a.server == nil {
-		panic("服务器未初始化")
-		return nil
+		panic(errors.New("服务器未初始化"))
 	}
 	return a.server
 }

@@ -1,22 +1,23 @@
 package database
 
 import (
-	"github.com/revel/config"
 	"database/sql"
-	_"github.com/go-sql-driver/mysql"
 	"fmt"
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/revel/config"
+	"lazyadm/core/library"
 	"time"
 )
 
 type Mysql struct {
 	databases map[string]*sql.DB
-	conf *config.Context
+	conf      *config.Context
 }
 
 func NewMysql(conf *config.Context) (*Mysql, error) {
-	return & Mysql{
+	return &Mysql{
 		databases: map[string]*sql.DB{},
-		conf: conf,
+		conf:      conf,
 	}, nil
 }
 
@@ -38,10 +39,7 @@ func (m *Mysql) Database(name string) *sql.DB {
 			conf.StringDefault("charset", "utf8"),
 		)
 		databases, err := sql.Open("mysql", dataSourceName)
-		if err != nil {
-			panic("mysql connect error" + err.Error())
-			return nil
-		}
+		library.CheckError(err)
 		databases.SetMaxIdleConns(16)
 		databases.SetMaxOpenConns(conf.IntDefault("maxOpenConns", 1000))
 		databases.SetConnMaxLifetime(time.Duration(60) * time.Second)
