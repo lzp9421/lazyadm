@@ -1,30 +1,22 @@
 package main
 
 import (
-	"lazyadm/core"
-	"lazyadm/routers"
+	"github.com/lazygo/lazygo"
 	"lazyadm/app"
+	"lazyadm/routers"
 )
 
-func init () {
+func init() {
 
-	application := core.App()
-
-	application.InitConfig("lazyadm.ini")
-
-	application.InitMysql()
-	application.InitRedis()
-	application.InitMemcache()
-
-	application.InitRouter(func(router *core.Router) {
+	regRouter := func(router *lazygo.Router) {
 		router.HandleStatic(app.Asset)
-		routers.RegisterWebHanler(router)
-		routers.RegisterApiHanler(router)
-	})
+		routers.RegisterWebHandler(router)
+		routers.RegisterApiHandler(router)
+	}
 
-	application.InitServer()
+	lazygo.App().InitApp("lazyadm", regRouter, app.Asset)
 }
 
-func main () {
-	core.App().Run()
+func main() {
+	lazygo.App().Run()
 }

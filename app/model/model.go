@@ -1,19 +1,23 @@
 package model
 
-import "lazyadm/core"
+import (
+	"github.com/lazygo/lazygo"
+	"github.com/lazygo/lazygo/memcache"
+	"github.com/lazygo/lazygo/mysql"
+)
 
 type Model struct {
-	core.Model
+	lazygo.Model
 }
 
-func (m *Model)HdDb() *core.Db {
+func (m *Model) HdDb() *mysql.Db {
 	return m.Db("hd")
 }
 
-func (m *Model)HdDbRead() *core.Db {
-	return m.Db("hd.read")
+func (m *Model) HdDbRead() *mysql.Db {
+	return m.Db("hd_read")
 }
 
-func (m *Model)HdMc() *core.Memcache {
+func (m *Model) HdMc() *memcache.Memcache {
 	return m.Mc("hd")
 }

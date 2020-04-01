@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"lazyadm/core"
+	"github.com/lazygo/lazygo"
 )
 
 type Controller struct {
-	core.Controller
+	lazygo.Controller
 }

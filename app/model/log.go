@@ -1,12 +1,15 @@
 package model
 
-import "lazyadm/core"
+import (
+	"github.com/lazygo/lazygo/library"
+	"github.com/lazygo/lazygo/mysql"
+)
 
 var table = "log"
 
 type Log struct {
 	Model
-	hdDb *core.Db
+	hdDb *mysql.Db
 }
 
 func NewLog() *Log {
@@ -15,16 +18,20 @@ func NewLog() *Log {
 	return log
 }
 
-func (l *Log)Insert(data map[string]interface{}) int64 {
+func (l *Log) Insert(data map[string]interface{}) int64 {
 	table := l.hdDb.Table(table)
-	return table.Insert(data)
+	res, err := table.Insert(data)
+	library.CheckError(err)
+	return res
 }
 
-func (l *Log)GetById(id int) map[string]interface{} {
+func (l *Log) GetById(id int) map[string]interface{} {
 
 	cond := map[string]interface{}{
 		"id": 1,
 	}
 	table := l.hdDb.Table(table)
-	return table.WhereMap(cond).FetchRow("*", "", "", 0)
+	res, err := table.WhereMap(cond).FetchRow("*", "", "", 0)
+	library.CheckError(err)
+	return res
 }
