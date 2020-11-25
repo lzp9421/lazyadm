@@ -1,5 +1,8 @@
 module lazyadm
 
-go 1.13
+go 1.15
 
-require github.com/lazygo/lazygo v0.0.0-20200226093758-88f9194c9b2a
+require (
+	github.com/jteeuwen/go-bindata v3.0.7+incompatible // indirect
+	github.com/lazygo/lazygo v0.1.2
+)

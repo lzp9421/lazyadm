@@ -1,3 +1,5 @@
 main
 lazyadm
 .idea
+asset/resource.go
+*.DS_Store

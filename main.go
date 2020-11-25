@@ -2,21 +2,19 @@ package main
 
 import (
 	"github.com/lazygo/lazygo"
-	"lazyadm/app"
-	"lazyadm/routers"
+	"github.com/lazygo/lazygo/config"
+	"github.com/lazygo/lazygo/utils"
+	"lazyadm/router"
 )
 
 func init() {
-
-	regRouter := func(router *lazygo.Router) {
-		router.HandleStatic(app.Asset)
-		routers.RegisterWebHandler(router)
-		routers.RegisterApiHandler(router)
-	}
-
-	lazygo.App().InitApp("lazyadm", regRouter, app.Asset)
+	config.LoadFile("lazyadm")
 }
 
 func main() {
-	lazygo.App().Run()
+	conf, err := config.GetSection("server")
+	utils.CheckFatal(err)
+	serv, err := lazygo.NewServer(conf, router.GetRouter())
+	utils.CheckFatal(err)
+	serv.Listen()
 }
