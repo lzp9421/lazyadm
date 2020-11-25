@@ -1,0 +1,9 @@
+//请求URL
+layui.define([],function(exports){
+    exports('api',{
+        login:'/api/user/login',
+        getMainMenu:'/api/menu/main',
+        getSideMenu:'/api/menu/side',
+        getGoods:'/api/user/goods'
+    });
+})
